@@ -1,4 +1,5 @@
 ﻿using Beacon.Web.Components;
+using Microsoft.FluentUI.AspNetCore.Components;
 
 namespace Beacon.Web;
 
@@ -9,9 +10,8 @@ public static class Setup
         var config = BeaconConfig.Default;
         builder.Configuration.Bind(config);
 
-
-        builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents();
+        builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+        builder.Services.AddFluentUIComponents();
 
         return builder.Build();
     }
