@@ -6,8 +6,8 @@
     <nav class="sitenav" aria-labelledby="main-menu" onclick="document.getElementById('navmenu-toggle').click();">
         <FluentNavMenu Id="main-menu" Collapsible="true" Width="250" Title="Navigation menu" @bind-Expanded="expanded">
             <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
-            <FluentNavLink Href="counter" Icon="@(new Icons.Regular.Size20.NumberSymbolSquare())" IconColor="Color.Accent">Counter</FluentNavLink>
-            <FluentNavLink Href="weather" Icon="@(new Icons.Regular.Size20.WeatherPartlyCloudyDay())" IconColor="Color.Accent">Weather</FluentNavLink>
+            <FluentNavLink Href="applications" Icon="@(new Icons.Regular.Size20.AppsListDetail())" IconColor="Color.Accent" Disabled>Applications</FluentNavLink>
+            <FluentNavLink Href="components" Icon="@(new Icons.Regular.Size20.TetrisApp())" IconColor="Color.Accent">Components</FluentNavLink>
         </FluentNavMenu>
     </nav>
 </div>

@@ -1,5 +1,6 @@
 ﻿using Beacon.Web.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.FluentUI.AspNetCore.Components.Components.Tooltip;
 
 namespace Beacon.Web;
 
@@ -13,6 +14,7 @@ public static class Setup
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
         builder.Services.AddFluentUIComponents();
 
+        builder.Services.AddScoped<ITooltipService, TooltipService>();
         return builder.Build();
     }
 
