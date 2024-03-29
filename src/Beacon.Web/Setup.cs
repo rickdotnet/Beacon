@@ -1,4 +1,9 @@
-﻿using Beacon.Web.Components;
+﻿using Apollo;
+using Apollo.Configuration;
+using Apollo.Messaging;
+using Beacon.Services;
+using Beacon.Web.Components;
+using Beacon.Web.Endpoints;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Microsoft.FluentUI.AspNetCore.Components.Components.Tooltip;
 
@@ -8,19 +13,21 @@ public static class Setup
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        var config = BeaconConfig.Default;
-        builder.Configuration.Bind(config);
-
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
         builder.Services.AddFluentUIComponents();
-
+        builder.Services.AddDataGridEntityFrameworkAdapter();
+        
+        builder.Services.AddBeaconServices();
+        builder.Services.AddApollo(
+            x => x.WithEndpoints(endpoints => endpoints.AddEndpoint<BeaconEndpoint>())
+        );
+        builder.Services.AddSingleton<IStateObserver, StateObserver>();
         builder.Services.AddScoped<ITooltipService, TooltipService>();
         return builder.Build();
     }
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
         {
@@ -36,7 +43,7 @@ public static class Setup
 
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
-        
+
         return app;
     }
 }

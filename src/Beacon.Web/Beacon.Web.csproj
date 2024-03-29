@@ -8,12 +8,20 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.6.0" />
+      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.DataGrid.EntityFrameworkAdapter" Version="4.6.0" />
       <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.6.0" />
+      <PackageReference Include="RickDotNet.Apollo" Version="0.1.1" />
+      <PackageReference Include="RickDotNet.Apollo.Messaging" Version="0.1.1" />
     </ItemGroup>
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css" />
       <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css.map" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Beacon.Contracts\Beacon.Contracts.csproj" />
+      <ProjectReference Include="..\Beacon.Services\Beacon.Services.csproj" />
     </ItemGroup>
 
 </Project>

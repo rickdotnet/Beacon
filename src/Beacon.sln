@@ -2,6 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Web", "Beacon.Web\Beacon.Web.csproj", "{A85BF14D-2A6D-430B-B34D-FB2C0DE1121B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{120EC694-5192-4E99-A385-0F7D81831A63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Services", "Beacon.Services\Beacon.Services.csproj", "{3ABABBC5-B702-4823-BEFC-13046D3AC222}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Contracts", "Beacon.Contracts\Beacon.Contracts.csproj", "{85136615-A68D-4590-A294-713E4E822EAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +18,18 @@ Global
 		{A85BF14D-2A6D-430B-B34D-FB2C0DE1121B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A85BF14D-2A6D-430B-B34D-FB2C0DE1121B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A85BF14D-2A6D-430B-B34D-FB2C0DE1121B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ABABBC5-B702-4823-BEFC-13046D3AC222}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ABABBC5-B702-4823-BEFC-13046D3AC222}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ABABBC5-B702-4823-BEFC-13046D3AC222}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ABABBC5-B702-4823-BEFC-13046D3AC222}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85136615-A68D-4590-A294-713E4E822EAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85136615-A68D-4590-A294-713E4E822EAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85136615-A68D-4590-A294-713E4E822EAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85136615-A68D-4590-A294-713E4E822EAE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A85BF14D-2A6D-430B-B34D-FB2C0DE1121B} = {120EC694-5192-4E99-A385-0F7D81831A63}
+		{3ABABBC5-B702-4823-BEFC-13046D3AC222} = {120EC694-5192-4E99-A385-0F7D81831A63}
+		{85136615-A68D-4590-A294-713E4E822EAE} = {120EC694-5192-4E99-A385-0F7D81831A63}
 	EndGlobalSection
 EndGlobal

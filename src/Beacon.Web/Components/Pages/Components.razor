@@ -1,10 +1,19 @@
 ﻿@page "/components"
+@using Apollo.Messaging
+@using Apollo.Messaging.Abstractions
+@using Beacon.Contracts
+@using Beacon.Contracts.Models
+@using Beacon.Services
+@using Apollo
+@inject IPublisherFactory PublisherFactory
+@inject BeaconStore BeaconStore
+@inject IStateObserver StateObserver
 @rendermode InteractiveServer
 
 <PageTitle>Components</PageTitle>
 
 <FluentLabel Typo="Typography.H1">Components</FluentLabel>
-
+<FluentButton OnClick="PublishCreate">Button</FluentButton>
 <FluentStack Style="margin-top: 10px">
     <FluentCard>
         <FluentLabel Typo="Typography.Header">Total Components</FluentLabel>
@@ -22,42 +31,32 @@
 
 <FluentDivider Style="width: 100%;margin: 10px" Orientation="Orientation.Horizontal" Role="DividerRole.Separator"></FluentDivider>
 
-<FluentTabs Orientation="Orientation.Vertical" OnTabChange="HandleOnTabChange" ActiveTabId="tab-overview">
+<FluentTabs Orientation="Orientation.Vertical" ActiveTabId="tab-overview">
     <FluentTab Label="Overview" Id="tab-overview">
-        @if (components == null)
-        {
-            <p>
-                <em>Loading...</em>
-            </p>
-        }
-        else
-        {
-            <!-- This page is rendered in SSR mode, so the FluentDataGrid component does not offer any interactivity (like sorting). -->
-            <FluentDataGrid Id="componentGrid" Items="@components" GridTemplateColumns="1fr 1fr 1fr 1fr 2fr" TGridItem="ComponentData">
-                <TemplateColumn Title="Name" Align="Align.Start">
-                    @{
-                        var id = Guid.NewGuid().ToString();
-                    }
-                    <a href="javascript:void(0)" id="@id" title="@context.Description">@context.Name</a>
-                    <FluentTooltip Anchor="@id">
-                        @context.Description
-                    </FluentTooltip>
-                </TemplateColumn>
-                <TemplateColumn Title="Status" Align="Align.Start">
-                    <FluentBadge Fill="green" BackgroundColor="green" Color="white">
-                        Online
-                    </FluentBadge>
-                </TemplateColumn>
-                <PropertyColumn Title="Type" Property="@(c => c!.Type)" Align="Align.Start"/>
-                <TemplateColumn Title="Environments" Align="Align.Start">
-                    @foreach (var environment in context.Environments)
-                    {
-                        <FluentBadge Appearance="Appearance.Accent" Style="margin-right: 5px">@environment</FluentBadge>
-                    }
-                </TemplateColumn>
-                <PropertyColumn Title="Link" Property="@(c => c!.Link)" Align="Align.Start"/>
-            </FluentDataGrid>
-        }
+        <FluentDataGrid @ref="grid" Id="componentGrid" Items="@BeaconStore.Components" GridTemplateColumns="1fr 1fr 1fr 1fr 2fr" TGridItem="Component">
+            <TemplateColumn Title="Name" Align="Align.Start">
+                @{
+                    var id = Guid.NewGuid().ToString();
+                }
+                <a href="javascript:void(0)" id="@id" title="@context.Description">@context.Name</a>
+                <FluentTooltip Anchor="@id">
+                    @context.Description
+                </FluentTooltip>
+            </TemplateColumn>
+            <TemplateColumn Title="Status" Align="Align.Start">
+                <FluentBadge Fill="green" BackgroundColor="green" Color="white">
+                    Online
+                </FluentBadge>
+            </TemplateColumn>
+            <PropertyColumn Title="Type" Sortable="true" Property="@(c => c!.Type)" Align="Align.Start"/>
+            <TemplateColumn Title="Environments" Align="Align.Start">
+                @foreach (var environment in context.Environments)
+                {
+                    <FluentBadge Appearance="Appearance.Accent" Style="margin-right: 5px">@environment</FluentBadge>
+                }
+            </TemplateColumn>
+            <PropertyColumn Title="Link" Property="@(c => c!.Links.FirstOrDefault())" Align="Align.Start"/>
+        </FluentDataGrid>
     </FluentTab>
     <FluentTab Label="Activity" Id="tab-activity">
         <div style="height: 400px">This will contain most recent health-checks.</div>
@@ -65,29 +64,32 @@
 </FluentTabs>
 
 @code {
-    private IQueryable<ComponentData>? components;
 
+    private IPublisher localPublisher;
+    private IDisposable? stateObserver;
     string? activeId = "tab-overview";
-    FluentTab? changedto;
-
-    private void HandleOnTabChange(FluentTab tab)
-    {
-        changedto = tab;
-    }
-
+    FluentDataGrid<Component>? grid;
     protected override Task OnInitializedAsync()
     {
-        components = Enumerable.Range(1, 5).Select(index => new ComponentData(
-            $"Component {index}",
-            "Service",
-            $"This is a description of component {index}",
-            ["Production", "Development"],
-            $"https://www.example.com/component/{index}"
-        )).AsQueryable();
-
+        stateObserver = StateObserver.Register<ComponentCreatedEvent>(OnComponentCreated);
+        localPublisher = PublisherFactory.CreatePublisher("BeaconEndpoint", PublisherType.Local);
         return Task.CompletedTask;
     }
 
-    public record ComponentData(string Name, string Type, string Description, string[] Environments, string Link);
+    private Task OnComponentCreated(ComponentCreatedEvent arg) 
+        => InvokeAsync(() => grid?.RefreshDataAsync() ?? Task.CompletedTask);
+
+    private async Task PublishCreate(MouseEventArgs obj)
+    {
+        await localPublisher.SendCommandAsync(
+            new CreateComponentCommand
+            {
+                Name = "Test Component",
+                Type = "Service",
+                Description = "This is a test component",
+                Environments = ["Production", "Development"],
+                Links = ["https://www.google.com"]
+            }, default);
+    }
 
 }
