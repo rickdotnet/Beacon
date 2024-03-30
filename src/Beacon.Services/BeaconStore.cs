@@ -5,22 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beacon.Services;
 
-public class BeaconStore
+/// <summary>
+/// Transactional data store for the Beacon application.
+/// </summary>
+public class BeaconStore : IDisposable, IAsyncDisposable
 {
     public IQueryable<Component> Components 
-        => contextFactory.CreateDbContext().Components;
-    
-    private readonly IDbContextFactory<BeaconContext> contextFactory;
-    private BeaconContext Context => contextFactory.CreateDbContext();
+        => context.Components;
 
-    public BeaconStore(IDbContextFactory<BeaconContext> contextFactory)
-    {
-        this.contextFactory = contextFactory;
-    }
+    private BeaconContext context;
+
+    public BeaconStore(IDbContextFactory<BeaconContext> contextFactory) 
+        => context = contextFactory.CreateDbContext();
 
     public async Task<Component> AddComponentAsync(CreateComponentCommand command)
     {
-        var context = await contextFactory.CreateDbContextAsync();
         var component = new Component
         {
             Name = command.Name,
@@ -36,4 +35,10 @@ public class BeaconStore
         
         return component;
     }
+
+    public void Dispose()
+        => context.Dispose();
+
+    public ValueTask DisposeAsync()
+        => context.DisposeAsync();
 }

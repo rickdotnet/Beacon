@@ -1,0 +1,128 @@
+﻿@implements IDialogContentComponent<EditComponentDialog.EditComponentData>
+
+@if (Content != null && Dialog != null)
+{
+    <FluentDialogHeader ShowDismiss="true">
+        <FluentStack VerticalAlignment="VerticalAlignment.Center">
+            <FluentIcon Value="@(new Icons.Regular.Size24.WindowApps())"/>
+            <FluentLabel Typo="Typography.PaneHeader">
+                @Dialog?.Instance?.Parameters?.Title
+            </FluentLabel>
+        </FluentStack>
+    </FluentDialogHeader>
+
+    <FluentDialogBody>
+        <EditForm EditContext="@editContext" FormName="editComponent">
+            <DataAnnotationsValidator/>
+
+            <FluentLabel Style="margin-bottom: 16px;">
+                Create a new component
+            </FluentLabel>
+
+            <FluentTextField @ref="nameField"
+                             Name="name"
+                             @bind-Value="@Content.Name"
+                             Label="Name"
+                             Style="width: 100%;"
+                             Required/>
+
+            <FluentSelect name="componentType" Label="Component Type" @bind-Value="Content.Type" TOption="string" Required >
+                <FluentOption Value="">Select type ...</FluentOption>
+                <FluentOption Value="service">Service</FluentOption>
+                <FluentOption Value="web">Web</FluentOption>
+                <FluentOption Value="database">Database</FluentOption>
+                <FluentOption Value="other">Other</FluentOption>
+            </FluentSelect>
+
+            <FluentTextArea Name="description"
+                            Rows=5
+                            Cols=60
+                            @bind-Value="Content.Description"
+                            Label="Description"
+                            Style="width: 100%;"/>
+
+            <FluentTextField Name="repoLink"
+                             @bind-Value="@Content.RepoLink"
+                             Label="Repository Link"
+                             Style="width: 100%;"
+                             />
+
+
+            <div style="color: var(--error);">
+                <FluentValidationSummary/>
+            </div>
+        </EditForm>
+    </FluentDialogBody>
+
+    <!-- Footer -->
+    <FluentDialogFooter>
+        <FluentButton Appearance="Appearance.Accent"
+                      Disabled="@(!editContext?.Validate() is true)"
+                      OnClick="@SaveAsync">
+            Save
+        </FluentButton>
+        <FluentButton Appearance="Appearance.Neutral"
+                      OnClick="@CancelAsync">
+            Cancel
+        </FluentButton>
+    </FluentDialogFooter>
+}
+
+@code {
+
+    [Parameter] public EditComponentData Content { get; set; } = new();
+
+    [CascadingParameter] public FluentDialog? Dialog { get; set; }
+
+    private EditContext editContext;
+    FluentTextField nameField;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(Content);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            nameField?.FocusAsync();
+    }
+
+    private Task SaveAsync()
+    {
+        if (editContext.Validate())
+            return Dialog?.CloseAsync(Content) ?? Task.CompletedTask;
+
+        return Task.CompletedTask;
+    }
+
+    private Task CancelAsync()
+        => Dialog?.CancelAsync() ?? Task.CompletedTask;
+
+    public record EditComponentData : UpdateComponentCommand
+    {
+        private string? repoLink;
+
+        public string? RepoLink
+        {
+            get => repoLink;
+            set
+            {
+                if (value == repoLink) return;
+
+                UpdateLinks(repoLink, value);
+                repoLink = value;
+            }
+        }
+
+        private void UpdateLinks(string? oldLink, string? newLink)
+        {
+            if (!string.IsNullOrEmpty(oldLink))
+                Links = Links.Where(x => x != oldLink).ToArray();
+
+            if (!string.IsNullOrEmpty(newLink))
+                Links = Links.Append(newLink).ToArray();
+        }
+    }
+
+}

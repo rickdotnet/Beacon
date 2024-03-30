@@ -1,19 +1,22 @@
 ﻿@page "/components"
+@implements IDisposable
 @using Apollo.Messaging
 @using Apollo.Messaging.Abstractions
-@using Beacon.Contracts
 @using Beacon.Contracts.Models
 @using Beacon.Services
-@using Apollo
+@using Beacon.Web.Components.Dialogs
 @inject IPublisherFactory PublisherFactory
 @inject BeaconStore BeaconStore
 @inject IStateObserver StateObserver
+@inject IDialogService DialogService
 @rendermode InteractiveServer
 
 <PageTitle>Components</PageTitle>
 
-<FluentLabel Typo="Typography.H1">Components</FluentLabel>
-<FluentButton OnClick="PublishCreate">Button</FluentButton>
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentLabel Typo="Typography.H2">Components</FluentLabel>
+    <p>Text about the thing with the thing</p>
+</FluentStack>
 <FluentStack Style="margin-top: 10px">
     <FluentCard>
         <FluentLabel Typo="Typography.Header">Total Components</FluentLabel>
@@ -29,19 +32,22 @@
     </FluentCard>
 </FluentStack>
 
-<FluentDivider Style="width: 100%;margin: 10px" Orientation="Orientation.Horizontal" Role="DividerRole.Separator"></FluentDivider>
+<FluentButton Style="margin-top: 10px" Appearance="Appearance.Accent" OnClick="PublishCreate">New Component</FluentButton>
+<FluentDivider Style="margin: 10px" Orientation="Orientation.Horizontal" Role="DividerRole.Separator"/>
 
 <FluentTabs Orientation="Orientation.Vertical" ActiveTabId="tab-overview">
     <FluentTab Label="Overview" Id="tab-overview">
-        <FluentDataGrid @ref="grid" Id="componentGrid" Items="@BeaconStore.Components" GridTemplateColumns="1fr 1fr 1fr 1fr 2fr" TGridItem="Component">
+        <FluentDataGrid @ref="grid" Id="componentGrid" Items="@BeaconStore.Components" GridTemplateColumns="2fr 1fr 1fr 1fr 2fr" TGridItem="Component">
             <TemplateColumn Title="Name" Align="Align.Start">
-                @{
-                    var id = Guid.NewGuid().ToString();
-                }
-                <a href="javascript:void(0)" id="@id" title="@context.Description">@context.Name</a>
-                <FluentTooltip Anchor="@id">
-                    @context.Description
-                </FluentTooltip>
+                <FluentStack Orientation="Orientation.Vertical">
+                    @{
+                        var id = Guid.NewGuid().ToString();
+                    }
+                    <a href="javascript:void(0)" id="@id">@context.Name</a>
+                    <FluentTooltip Anchor="@id" Position="TooltipPosition.Right">
+                        @context.Description
+                    </FluentTooltip>
+                </FluentStack>
             </TemplateColumn>
             <TemplateColumn Title="Status" Align="Align.Start">
                 <FluentBadge Fill="green" BackgroundColor="green" Color="white">
@@ -65,31 +71,50 @@
 
 @code {
 
-    private IPublisher localPublisher;
     private IDisposable? stateObserver;
-    string? activeId = "tab-overview";
+    private IPublisher localPublisher;
+
     FluentDataGrid<Component>? grid;
-    protected override Task OnInitializedAsync()
+    string? activeId = "tab-overview";
+
+    protected override void OnInitialized()
     {
         stateObserver = StateObserver.Register<ComponentCreatedEvent>(OnComponentCreated);
         localPublisher = PublisherFactory.CreatePublisher("BeaconEndpoint", PublisherType.Local);
-        return Task.CompletedTask;
     }
 
-    private Task OnComponentCreated(ComponentCreatedEvent arg) 
+    private Task OnComponentCreated(ComponentCreatedEvent arg)
         => InvokeAsync(() => grid?.RefreshDataAsync() ?? Task.CompletedTask);
 
     private async Task PublishCreate(MouseEventArgs obj)
     {
-        await localPublisher.SendCommandAsync(
-            new CreateComponentCommand
+        var data = new EditComponentDialog.EditComponentData();
+        var dialog = await DialogService.ShowDialogAsync<EditComponentDialog>(data,
+            new DialogParameters
             {
-                Name = "Test Component",
-                Type = "Service",
-                Description = "This is a test component",
-                Environments = ["Production", "Development"],
-                Links = ["https://www.google.com"]
+                //Height = "400px",
+                Title = "New Component",
+                PreventDismissOnOverlayClick = true,
+                PreventScroll = true,
+            });
+
+        var result = await dialog.Result;
+
+        if (result is { Cancelled: false, Data: not null })
+        {
+            var component = (EditComponentDialog.EditComponentData)result.Data;
+            await localPublisher.SendCommandAsync(new CreateComponentCommand
+            {
+                Name = component.Name,
+                Type = component.Type,
+                Description = component.Description,
+                Environments = component.Environments,
+                Links = component.Links
             }, default);
+        }
     }
+
+    public void Dispose()
+        => stateObserver?.Dispose();
 
 }

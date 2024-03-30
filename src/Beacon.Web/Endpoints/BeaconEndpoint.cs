@@ -9,16 +9,15 @@ namespace Beacon.Web.Endpoints;
 public class BeaconEndpoint : IHandle<CreateComponentCommand>, IListenFor<ComponentCreatedEvent>
 {
     private readonly BeaconStore beaconStore;
-    private readonly IStateObserver stateObserver;
+    private readonly IStateObserver? stateObserver;
     private readonly IPublisher publisher;
 
-    public BeaconEndpoint(BeaconStore beaconStore, IPublisherFactory publisherFactory, IStateObserver stateObserver)
+    public BeaconEndpoint(BeaconStore beaconStore, IPublisherFactory publisherFactory, IStateObserver? stateObserver)
     {
         this.beaconStore = beaconStore;
         this.stateObserver = stateObserver;
         publisher = publisherFactory.CreatePublisher("BeaconEndpoint");
     }
-
 
     public async Task HandleAsync(CreateComponentCommand message, CancellationToken cancellationToken)
     {
@@ -26,7 +25,7 @@ public class BeaconEndpoint : IHandle<CreateComponentCommand>, IListenFor<Compon
         await publisher.BroadcastAsync(
             new ComponentCreatedEvent
             {
-                Id = component.Id,
+                Id = component.Guid,
                 Name = component.Name,
                 Type = component.Type,
                 Description = component.Description,
@@ -37,10 +36,9 @@ public class BeaconEndpoint : IHandle<CreateComponentCommand>, IListenFor<Compon
             }, cancellationToken);
     }
 
-    public async Task HandleAsync(ComponentCreatedEvent message, CancellationToken cancellationToken = default)
+    public Task HandleAsync(ComponentCreatedEvent message, CancellationToken cancellationToken = default)
     {
         Console.WriteLine($"Component created: {message.Name}");
-        await stateObserver.NotifyAsync(message);
-        // return Task.CompletedTask;
+        return stateObserver?.NotifyAsync(message, cancellationToken) ?? Task.CompletedTask;
     }
 }

@@ -2,8 +2,10 @@
 
 namespace Beacon.Contracts;
 
+public record UpdateComponentCommand : CreateComponentCommand;
 public record CreateComponentCommand : ICommand
 {
+    public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -15,7 +17,7 @@ public record CreateComponentCommand : ICommand
 
 public record ComponentCreatedEvent : IEvent
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
