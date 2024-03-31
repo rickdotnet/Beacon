@@ -4,41 +4,49 @@
 @inject HealthCheckStore HealthCheckStore
 @inject IStateObserver StateObserver
 
-@switch (IsHealthy)
+@if (LastCheck == null)
 {
-    case null:
-        <em>Loading...</em>
-        break;
-    case true:
+    <FluentBadge Fill="gray" BackgroundColor="gray" Color="white">
+        @defaultBadgeText
+    </FluentBadge>
+}
+else
+{
+    if (IsHealthy is true)
+    {
         <FluentBadge Fill="green" BackgroundColor="green" Color="white">
-        Healthy
-    </FluentBadge>
-        break;
-    default:
+            healthy
+        </FluentBadge>
+    }
+    else
+    {
         <FluentBadge Fill="red" BackgroundColor="red" Color="white">
-        Unhealthy
-    </FluentBadge>
-        break;
+            unhealthy
+        </FluentBadge>
+    }
 }
 
 @code {
     [Parameter] public Guid ComponentId { get; set; }
 
-    private Healthcheck? LastCheck {get;set; } = null;
+    private Healthcheck? LastCheck { get; set; } = null;
     private bool? IsHealthy => LastCheck.IsHealthyWithin(defaultExpiration);
-    
+    private string defaultBadgeText = "loading...";
+
     private readonly TimeSpan defaultExpiration = TimeSpan.FromSeconds(10);
     private DateTime? lastSignalTime = null;
     private IDisposable? healthCheckObserver;
+
     protected override async Task OnInitializedAsync()
     {
         // I'm worried about the number of rows in a grid that might
         // have a hook in here since each row will have it's own badge.
         // Might need to monitor this and see if it will be a problem
         healthCheckObserver = StateObserver.Register<HealthCheckSignaledEvent>(OnHealthCheckSignaled);
-        
+
         // TODO: timeout scenario? not likely to happen
         LastCheck = await HealthCheckStore.GetHealthCheckOrDefault(ComponentId);
+        if(LastCheck == null) defaultBadgeText = "disabled";
     }
 
     private Task OnHealthCheckSignaled(HealthCheckSignaledEvent arg)
@@ -51,11 +59,11 @@
             LastCheck.IsHealthy = arg.IsHealthy;
             LastCheck.SignalTime = DateTime.UtcNow;
         }
-        
+
         return InvokeAsync(StateHasChanged);
     }
 
-    public void Dispose() 
+    public void Dispose()
         => healthCheckObserver?.Dispose();
 
 }

@@ -23,5 +23,6 @@ public static class Setup
         services.AddSingleton<BlobStore>();
         services.AddScoped<BeaconStore>();
         services.AddScoped<HealthCheckStore>();
+        services.AddScoped<ComponentStore>();
     }
 }

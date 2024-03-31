@@ -44,7 +44,7 @@
                     @{
                         var id = Guid.NewGuid().ToString();
                     }
-                    <a href="javascript:void(0)" id="@id">@context.Name</a>
+                    <a href="@($"/components/{context.Guid}")" id="@id">@context.Name</a>
                     <FluentTooltip Anchor="@id" Position="TooltipPosition.Right">
                         @context.Description
                     </FluentTooltip>

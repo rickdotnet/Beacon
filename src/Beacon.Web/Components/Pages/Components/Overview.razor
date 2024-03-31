@@ -1,0 +1,102 @@
+﻿@page "/components/{ComponentId:guid}"
+@using Beacon.Contracts.Models
+@using Beacon.Services
+@using Beacon.Services.Data
+@inject ComponentStore ComponentStore;
+@rendermode InteractiveServer
+
+@if (Component == null)
+{
+    <PageTitle>Components</PageTitle>
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <PageTitle>Component - @Component.Name</PageTitle>
+
+    <FluentLabel Style="margin-top: 20px" Typo="Typography.H3">
+        <FluentIcon Value="@(new Icons.Regular.Size24.TetrisApp())" Color="@Color.Neutral"/> @Component.Name
+    </FluentLabel>
+
+    <FluentStack Style="margin-top: 20px">
+        <FluentCard>
+            <FluentStack Style="margin-bottom: 10px" VerticalAlignment="VerticalAlignment.Center">
+                <FluentLabel Typo="Typography.Header">Overview</FluentLabel>
+                <HealthBadge ComponentId="ComponentId"/>
+            </FluentStack>
+            <FluentStack Style="margin-bottom: 10px" VerticalAlignment="VerticalAlignment.Center">
+                <FluentLabel Typo="Typography.H6">Type</FluentLabel>
+                <div>@Component.Type</div>
+            </FluentStack>
+            <FluentStack Style="margin-bottom: 10px" VerticalAlignment="VerticalAlignment.Center">
+                <FluentLabel Typo="Typography.H6">Environments</FluentLabel>
+                <FluentOverflow Style="width: 100%;">
+                    @foreach (var env in Component.Environments)
+                    {
+                        <FluentOverflowItem>
+                            <FluentBadge>@env</FluentBadge>
+                        </FluentOverflowItem>
+                    }
+                </FluentOverflow>
+            </FluentStack>
+            <FluentStack Style="margin-bottom: 10px" VerticalAlignment="VerticalAlignment.Center">
+                <FluentLabel Typo="Typography.H6">Links</FluentLabel>
+                @foreach (var link in Component.Links)
+                {
+                    <FluentAnchor Href="@link">@link</FluentAnchor>
+                }
+            </FluentStack>
+        </FluentCard>
+        <FluentCard>
+            <FluentLabel Style="margin-bottom: 10px" Typo="Typography.Header">Activity Log</FluentLabel>
+            <FluentDataGrid id="manualGrid" GenerateHeader=GenerateHeaderOption.None GridTemplateColumns=".4fr 1fr" TGridItem="string" role="grid">
+                <FluentDataGridRow RowType="DataGridRowType.Header">
+                    <FluentDataGridCell GridColumn=1 CellType="DataGridCellType.ColumnHeader">Time</FluentDataGridCell>
+                    <FluentDataGridCell GridColumn=2 CellType="DataGridCellType.ColumnHeader">Activity</FluentDataGridCell>
+                </FluentDataGridRow>
+                <FluentDataGridRow>
+                    <FluentDataGridCell GridColumn=1>3:50 PM</FluentDataGridCell>
+                    <FluentDataGridCell GridColumn=2>This is an example message, today.</FluentDataGridCell>
+                </FluentDataGridRow>
+                <FluentDataGridRow>
+                    <FluentDataGridCell GridColumn=1>2024-03-31</FluentDataGridCell>
+                    <FluentDataGridCell GridColumn=2>This happened in the past</FluentDataGridCell>
+                </FluentDataGridRow>
+            </FluentDataGrid>
+        </FluentCard>
+        <FluentCard>
+            <FluentLabel Style="margin-bottom: 10px" Typo="Typography.Header">Health Checks</FluentLabel>
+            <FluentDataGrid id="manualGrid" GenerateHeader=GenerateHeaderOption.None GridTemplateColumns=".4fr 1fr" TGridItem="string" role="grid">
+                <FluentDataGridRow RowType="DataGridRowType.Header">
+                    <FluentDataGridCell GridColumn=1 CellType="DataGridCellType.ColumnHeader">Time</FluentDataGridCell>
+                    <FluentDataGridCell GridColumn=2 CellType="DataGridCellType.ColumnHeader">Status</FluentDataGridCell>
+                </FluentDataGridRow>
+                <FluentDataGridRow>
+                    <FluentDataGridCell GridColumn=1>3:50 PM</FluentDataGridCell>
+                    <FluentDataGridCell GridColumn=2><FluentBadge BackgroundColor="green" Color="white" Fill="green">healthy</FluentBadge></FluentDataGridCell>
+                </FluentDataGridRow>
+                <FluentDataGridRow>
+                    <FluentDataGridCell GridColumn=1>2024-03-31</FluentDataGridCell>
+                    <FluentDataGridCell GridColumn=2><FluentBadge BackgroundColor="red" Color="white" Fill="red">unhealthy</FluentBadge></FluentDataGridCell>
+                </FluentDataGridRow>
+            </FluentDataGrid>
+        </FluentCard>
+    </FluentStack>
+}
+
+<FluentLabel Style="margin-top: 20px" Typo="Typography.H3">Chart time?</FluentLabel>
+
+@code {
+
+    [Parameter] public Guid ComponentId { get; set; }
+
+    private Component? Component { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Component = await ComponentStore.GetComponentAsync(ComponentId);
+    }
+
+}
