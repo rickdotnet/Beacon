@@ -11,4 +11,6 @@ public class Component
     public string[] Tags { get; set; } = Array.Empty<string>();
     public string[] Owners { get; set; } = Array.Empty<string>();
     public string[] Links { get; set; } = Array.Empty<string>();
+    
+    public List<Healthcheck> Healthchecks { get; set; } = new();
 }

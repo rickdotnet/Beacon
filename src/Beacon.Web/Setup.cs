@@ -19,7 +19,12 @@ public static class Setup
         
         builder.Services.AddBeaconServices();
         builder.Services.AddApollo(
-            x => x.WithEndpoints(endpoints => endpoints.AddEndpoint<BeaconEndpoint>())
+            x => x.WithEndpoints(
+                endpoints =>
+                {
+                    endpoints.AddEndpoint<BeaconEndpoint>();
+                    endpoints.AddEndpoint<HealthCheckEndpoint>();
+                })
         );
         builder.Services.AddSingleton<IStateObserver, StateObserver>();
         builder.Services.AddScoped<ITooltipService, TooltipService>();

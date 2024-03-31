@@ -1,0 +1,51 @@
+﻿@using Beacon.Services
+@implements IDisposable
+@inject HealthCheckStore HealthCheckStore
+@inject IStateObserver StateObserver
+
+@switch (isHealthy)
+{
+    case null:
+        <em>Loading...</em>
+        break;
+    case true:
+        <FluentBadge Fill="green" BackgroundColor="green" Color="white">
+            Healthy
+        </FluentBadge>
+        break;
+    default:
+        <FluentBadge Fill="red" BackgroundColor="red" Color="white">
+            Unhealthy
+        </FluentBadge>
+        break;
+}
+
+@code {
+    [Parameter] public Guid ComponentId { get; set; }
+
+    private bool? isHealthy = null;
+    private IDisposable? healthCheckObserver;
+    protected override async Task OnInitializedAsync()
+    {
+        // I'm worried about the number of rows in a grid that might
+        // have a hook in here since each row will have it's own badge.
+        // Might need to monitor this and see if it will be a problem
+        healthCheckObserver = StateObserver.Register<HealthCheckSignaledEvent>(OnHealthCheckSignaled);
+        
+        // TODO: timeout scenario? not likely to happen
+        isHealthy = await HealthCheckStore.IsHealthy(ComponentId);
+    }
+
+    private Task OnHealthCheckSignaled(HealthCheckSignaledEvent arg)
+    {
+        Console.WriteLine($"HealthCheckSignaledEvent: {arg.ComponentId} {arg.IsHealthy}");
+        if(ComponentId.Equals(arg.ComponentId))
+            isHealthy = arg.IsHealthy;
+        
+        return InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() 
+        => healthCheckObserver?.Dispose();
+
+}

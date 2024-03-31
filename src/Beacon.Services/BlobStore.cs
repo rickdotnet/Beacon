@@ -1,4 +1,5 @@
-﻿using Beacon.Contracts.Models;
+﻿using Beacon.Contracts;
+using Beacon.Contracts.Models;
 using FusionRocks;
 using Microsoft.Extensions.Caching.Memory;
 using ZiggyCreatures.Caching.Fusion;
@@ -16,8 +17,13 @@ public sealed class BlobStore : IDisposable
 
     public BlobStore()
     {
+        var folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var beacon = Path.Combine(folder, "Beacon");
+        var path = Path.Combine(beacon, "blob-store"); // TODO: this needs configured
         var serializer = new FusionCacheSystemTextJsonSerializer();
-        rocksDb = new FusionRocks.FusionRocks(FusionRocksOptions.Default, serializer);
+        var options = FusionRocksOptions.Default with { CachePath = path };
+        
+        rocksDb = new FusionRocks.FusionRocks(options, serializer);
         cache = new FusionCache(new FusionCacheOptions
         {
             CacheName = "blob-store",
@@ -26,25 +32,18 @@ public sealed class BlobStore : IDisposable
                 Duration = TimeSpan.FromDays(7),
                 IsFailSafeEnabled = true,
                 DistributedCacheDuration = TimeSpan.MaxValue
-            },
-            
-            //CacheKeyPrefix = null,
-            //DistributedCacheKeyModifierMode = CacheKeyModifierMode.Prefix,
+            }
         });
 
         cache.SetupDistributedCache(rocksDb, serializer);
     }
-    
-    public ValueTask<T?> GetOrDefaultAsync<T>(string key) 
-        => cache.GetOrDefaultAsync<T>(key);
-
     public ValueTask<T> GetOrSetAsync<T>(string key, T value, FusionCacheEntryOptions? options = null)
         => cache.GetOrSetAsync(key, value);
 
     public ValueTask SetAsync<T>(string key, T value, FusionCacheEntryOptions? options = default) 
         => cache.SetAsync(key, value, options ?? new FusionCacheEntryOptions() );
 
-    public ValueTask SetLevel2Async<T>(string key, T value, FusionCacheEntryOptions? options)
+    public ValueTask SetLevel2Async<T>(string key, T value, FusionCacheEntryOptions? options = default)
     {
         options ??= new FusionCacheEntryOptions();
         options.SkipMemoryCache = true;
@@ -56,20 +55,16 @@ public sealed class BlobStore : IDisposable
         cache.Dispose();
         rocksDb.Dispose();
     }
-}
-public static class BlobStoreExtensions
-{
-    public static ValueTask AddHealthCheck(this BlobStore store, HealthCheckSignal value)
-        => store.SetAsync($"health:{value.UniqueId}", value);
-    
-    public static ValueTask<HealthCheckSignal?> GetHealthCheck(this BlobStore store, string uniqueId)
-        => store.GetOrDefaultAsync<HealthCheckSignal>($"health:{uniqueId}");
-    
-    public static async ValueTask<HealthCheckSignal?> GetOrSetHealthCheck(
-        this BlobStore store,
-        string uniqueId,
-        Func<CancellationToken, Task<HealthCheckSignal>> factory,
-        FusionCacheEntryOptions? options = null,
-        CancellationToken token = default)
-        => await store.GetOrSetAsync($"health:{uniqueId}", await factory(token), options);
+
+    public ValueTask<TValue?> GetOrDefaultAsync<TValue>(string key, TValue? defaultValue = default,
+        FusionCacheEntryOptions? options = null, CancellationToken token = default)
+    {
+        return cache.GetOrDefaultAsync(key, defaultValue, options, token);
+    }
+
+    public TValue? GetOrDefault<TValue>(string key, TValue? defaultValue = default(TValue?),
+        FusionCacheEntryOptions? options = null, CancellationToken token = new CancellationToken())
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -7,6 +7,7 @@
 @using Beacon.Web.Components.Dialogs
 @inject IPublisherFactory PublisherFactory
 @inject BeaconStore BeaconStore
+@inject HealthCheckStore HealthCheckStore
 @inject IStateObserver StateObserver
 @inject IDialogService DialogService
 @rendermode InteractiveServer
@@ -50,9 +51,7 @@
                 </FluentStack>
             </TemplateColumn>
             <TemplateColumn Title="Status" Align="Align.Start">
-                <FluentBadge Fill="green" BackgroundColor="green" Color="white">
-                    Online
-                </FluentBadge>
+                <HealthBadge ComponentId="context.Guid" />
             </TemplateColumn>
             <PropertyColumn Title="Type" Sortable="true" Property="@(c => c!.Type)" Align="Align.Start"/>
             <TemplateColumn Title="Environments" Align="Align.Start">
@@ -71,7 +70,7 @@
 
 @code {
 
-    private IDisposable? stateObserver;
+    private IDisposable? componentObserver;
     private IPublisher localPublisher;
 
     FluentDataGrid<Component>? grid;
@@ -79,7 +78,7 @@
 
     protected override void OnInitialized()
     {
-        stateObserver = StateObserver.Register<ComponentCreatedEvent>(OnComponentCreated);
+        componentObserver = StateObserver.Register<ComponentCreatedEvent>(OnComponentCreated);
         localPublisher = PublisherFactory.CreatePublisher("BeaconEndpoint", PublisherType.Local);
     }
 
@@ -115,6 +114,6 @@
     }
 
     public void Dispose()
-        => stateObserver?.Dispose();
+        => componentObserver?.Dispose();
 
 }

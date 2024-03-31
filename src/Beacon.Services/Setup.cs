@@ -19,6 +19,9 @@ public static class Setup
         {
             options.UseSqlite($"Data Source={path}");
         });
+
+        services.AddSingleton<BlobStore>();
         services.AddScoped<BeaconStore>();
+        services.AddScoped<HealthCheckStore>();
     }
 }
