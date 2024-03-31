@@ -1,7 +1,5 @@
 ﻿using Beacon.Contracts;
 using Beacon.Contracts.Models;
-using Microsoft.Extensions.Caching.Memory;
-using ZiggyCreatures.Caching.Fusion;
 
 namespace Beacon.Services;
 
@@ -16,7 +14,7 @@ public class HealthCheckStore
         this.blobStore = blobStore;
     }
     
-    public async ValueTask AddHealthCheck(HealthCheckSignaledEvent value)
+    public async Task AddHealthCheck(HealthCheckSignaledEvent value)
     {
         var healthCheck = await beaconStore.AddHealthcheckAsync(value);
         

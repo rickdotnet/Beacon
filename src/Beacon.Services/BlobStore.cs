@@ -1,7 +1,4 @@
-﻿using Beacon.Contracts;
-using Beacon.Contracts.Models;
-using FusionRocks;
-using Microsoft.Extensions.Caching.Memory;
+﻿using FusionRocks;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 

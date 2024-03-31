@@ -17,7 +17,23 @@ public class HealthCheckEndpoint : IListenFor<HealthCheckSignaledEvent>
     }
     public async Task HandleAsync(HealthCheckSignaledEvent message, CancellationToken cancellationToken = default)
     {
-        await healthCheckStore.AddHealthCheck(message).AsTask();
-        stateObserver?.NotifyAsync(message, cancellationToken);
+        try
+        {
+            if(message.ComponentName == "ui-refresh")
+            {
+                stateObserver?.NotifyAsync(message, cancellationToken);
+            }
+            else
+            {
+                await healthCheckStore.AddHealthCheck(message);
+                stateObserver?.NotifyAsync(message, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignored
+        }
+
+        
     }
 }

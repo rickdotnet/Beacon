@@ -1,29 +1,34 @@
-﻿@using Beacon.Services
+﻿@using Beacon.Contracts.Models
+@using Beacon.Services
 @implements IDisposable
 @inject HealthCheckStore HealthCheckStore
 @inject IStateObserver StateObserver
 
-@switch (isHealthy)
+@switch (IsHealthy)
 {
     case null:
         <em>Loading...</em>
         break;
     case true:
         <FluentBadge Fill="green" BackgroundColor="green" Color="white">
-            Healthy
-        </FluentBadge>
+        Healthy
+    </FluentBadge>
         break;
     default:
         <FluentBadge Fill="red" BackgroundColor="red" Color="white">
-            Unhealthy
-        </FluentBadge>
+        Unhealthy
+    </FluentBadge>
         break;
 }
 
 @code {
     [Parameter] public Guid ComponentId { get; set; }
 
-    private bool? isHealthy = null;
+    private Healthcheck? LastCheck {get;set; } = null;
+    private bool? IsHealthy => LastCheck.IsHealthyWithin(defaultExpiration);
+    
+    private readonly TimeSpan defaultExpiration = TimeSpan.FromSeconds(10);
+    private DateTime? lastSignalTime = null;
     private IDisposable? healthCheckObserver;
     protected override async Task OnInitializedAsync()
     {
@@ -33,14 +38,19 @@
         healthCheckObserver = StateObserver.Register<HealthCheckSignaledEvent>(OnHealthCheckSignaled);
         
         // TODO: timeout scenario? not likely to happen
-        isHealthy = await HealthCheckStore.IsHealthy(ComponentId);
+        LastCheck = await HealthCheckStore.GetHealthCheckOrDefault(ComponentId);
     }
 
     private Task OnHealthCheckSignaled(HealthCheckSignaledEvent arg)
     {
-        Console.WriteLine($"HealthCheckSignaledEvent: {arg.ComponentId} {arg.IsHealthy}");
-        if(ComponentId.Equals(arg.ComponentId))
-            isHealthy = arg.IsHealthy;
+        Console.WriteLine($"HealthCheckSignaledEvent: {arg.ComponentName} {arg.IsHealthy}");
+        if (ComponentId.Equals(arg.ComponentId))
+        {
+            Console.WriteLine($"We are updating {arg.ComponentId} {arg.IsHealthy}");
+            LastCheck ??= new();
+            LastCheck.IsHealthy = arg.IsHealthy;
+            LastCheck.SignalTime = DateTime.UtcNow;
+        }
         
         return InvokeAsync(StateHasChanged);
     }

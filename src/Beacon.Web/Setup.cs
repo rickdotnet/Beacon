@@ -1,5 +1,4 @@
 ﻿using Apollo;
-using Apollo.Configuration;
 using Apollo.Messaging;
 using Beacon.Services;
 using Beacon.Web.Components;
@@ -18,6 +17,7 @@ public static class Setup
         builder.Services.AddDataGridEntityFrameworkAdapter();
         
         builder.Services.AddBeaconServices();
+        builder.Services.AddHostedService<HealthCheckRefresher>();
         builder.Services.AddApollo(
             x => x.WithEndpoints(
                 endpoints =>
@@ -28,6 +28,7 @@ public static class Setup
         );
         builder.Services.AddSingleton<IStateObserver, StateObserver>();
         builder.Services.AddScoped<ITooltipService, TooltipService>();
+        
         return builder.Build();
     }
 
