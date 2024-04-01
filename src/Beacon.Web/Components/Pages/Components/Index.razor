@@ -39,7 +39,7 @@
 <FluentTabs Orientation="Orientation.Vertical" ActiveTabId="tab-overview">
     <FluentTab Label="Overview" Id="tab-overview">
         <FluentDataGrid @ref="grid" Id="componentGrid" Items="@BeaconStore.Components" GridTemplateColumns="2fr 1fr 1fr 1fr 2fr" TGridItem="Component">
-            <TemplateColumn Title="Name" Align="Align.Start">
+            <TemplateColumn Title="Name" Sortable="true" SortBy="@nameSort" Align="Align.Start">
                 <FluentStack Orientation="Orientation.Vertical">
                     @{
                         var id = Guid.NewGuid().ToString();
@@ -75,6 +75,8 @@
 
     FluentDataGrid<Component>? grid;
     string? activeId = "tab-overview";
+
+    GridSort<Component> nameSort = GridSort<Component>.ByAscending(p => p.Name);
 
     protected override void OnInitialized()
     {

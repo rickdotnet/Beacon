@@ -1,4 +1,5 @@
 ﻿using FusionRocks;
+using RocksDbSharp;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
@@ -18,7 +19,12 @@ public sealed class BlobStore : IDisposable
         var beacon = Path.Combine(folder, "Beacon");
         var path = Path.Combine(beacon, "blob-store"); // TODO: this needs configured
         var serializer = new FusionCacheSystemTextJsonSerializer();
-        var options = FusionRocksOptions.Default with { CachePath = path };
+        var dbOptions = new DbOptions();
+        dbOptions.SetCreateIfMissing();
+        // dbOptions.SetWalDir(Path.Combine(beacon, "wal"));
+        // dbOptions.SetWalRecoveryMode(Recovery.AbsoluteConsistency);
+        
+        var options = FusionRocksOptions.Default with { CachePath = path, DbOptions = dbOptions};
         
         rocksDb = new FusionRocks.FusionRocks(options, serializer);
         cache = new FusionCache(new FusionCacheOptions
@@ -27,7 +33,6 @@ public sealed class BlobStore : IDisposable
             DefaultEntryOptions = new FusionCacheEntryOptions
             {
                 Duration = TimeSpan.FromDays(7),
-                IsFailSafeEnabled = true,
                 DistributedCacheDuration = TimeSpan.MaxValue
             }
         });
@@ -35,12 +40,12 @@ public sealed class BlobStore : IDisposable
         cache.SetupDistributedCache(rocksDb, serializer);
     }
     public ValueTask<T> GetOrSetAsync<T>(string key, T value, FusionCacheEntryOptions? options = null)
-        => cache.GetOrSetAsync(key, value);
+        => cache.GetOrSetAsync(key, value, options);
 
-    public ValueTask SetAsync<T>(string key, T value, FusionCacheEntryOptions? options = default) 
-        => cache.SetAsync(key, value, options ?? new FusionCacheEntryOptions() );
+    public ValueTask SetAsync<T>(string key, T value, FusionCacheEntryOptions? options = null) 
+        => cache.SetAsync(key, value, options);
 
-    public ValueTask SetLevel2Async<T>(string key, T value, FusionCacheEntryOptions? options = default)
+    public ValueTask SetLevel2Async<T>(string key, T value, FusionCacheEntryOptions? options = null)
     {
         options ??= new FusionCacheEntryOptions();
         options.SkipMemoryCache = true;
