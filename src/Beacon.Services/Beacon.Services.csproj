@@ -13,7 +13,7 @@
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.3" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
-      <PackageReference Include="RickDotNet.FusionRocks" Version="0.1.2" />
+      <PackageReference Include="RickDotNet.FusionRocks" Version="0.1.5" />
       <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="1.0.0" />
     </ItemGroup>
 

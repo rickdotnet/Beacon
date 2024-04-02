@@ -19,12 +19,7 @@ public sealed class BlobStore : IDisposable
         var beacon = Path.Combine(folder, "Beacon");
         var path = Path.Combine(beacon, "blob-store"); // TODO: this needs configured
         var serializer = new FusionCacheSystemTextJsonSerializer();
-        var dbOptions = new DbOptions();
-        dbOptions.SetCreateIfMissing();
-        // dbOptions.SetWalDir(Path.Combine(beacon, "wal"));
-        // dbOptions.SetWalRecoveryMode(Recovery.AbsoluteConsistency);
-        
-        var options = FusionRocksOptions.Default with { CachePath = path, DbOptions = dbOptions};
+        var options = FusionRocksOptions.Default with { CachePath = path, DatabaseMode = true};
         
         rocksDb = new FusionRocks.FusionRocks(options, serializer);
         cache = new FusionCache(new FusionCacheOptions
@@ -32,8 +27,9 @@ public sealed class BlobStore : IDisposable
             CacheName = "blob-store",
             DefaultEntryOptions = new FusionCacheEntryOptions
             {
-                Duration = TimeSpan.FromDays(7),
-                DistributedCacheDuration = TimeSpan.MaxValue
+                Duration = TimeSpan.FromDays(1),
+                IsFailSafeEnabled = true, // in conjunction with database mode, this *should* turn our L2 cache into a non-expiring database
+                DistributedCacheDuration = TimeSpan.MaxValue // shouldn't be necessary, but just in case
             }
         });
 
