@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.6.0" />
-      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.DataGrid.EntityFrameworkAdapter" Version="4.6.0" />
-      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.6.0" />
-      <PackageReference Include="RickDotNet.Apollo" Version="0.1.1" />
-      <PackageReference Include="RickDotNet.Apollo.Messaging" Version="0.1.1" />
+      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.7.2" />
+      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.DataGrid.EntityFrameworkAdapter" Version="4.7.2" />
+      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.7.2" />
+      <PackageReference Include="RickDotNet.Apollo.Messaging.NATS" Version="0.3.1" />
+      <PackageReference Include="RickDotNet.Apollo.Messaging.WebApi" Version="0.3.1" />
     </ItemGroup>
 
     <ItemGroup>

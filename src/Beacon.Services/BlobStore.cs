@@ -1,5 +1,4 @@
 ﻿using FusionRocks;
-using RocksDbSharp;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 

@@ -1,6 +1,6 @@
 ﻿using Apollo;
-using Apollo.Messaging;
 using Apollo.Messaging.Abstractions;
+using Apollo.Messaging.Publishing;
 using Beacon.Contracts;
 using Beacon.Services;
 

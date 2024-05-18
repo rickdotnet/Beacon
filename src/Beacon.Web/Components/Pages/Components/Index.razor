@@ -1,7 +1,7 @@
 ﻿@page "/components"
 @implements IDisposable
-@using Apollo.Messaging
 @using Apollo.Messaging.Abstractions
+@using Apollo.Messaging.Publishing
 @using Beacon.Contracts.Models
 @using Beacon.Services
 @using Beacon.Web.Components.Dialogs
@@ -80,6 +80,8 @@
 
     protected override void OnInitialized()
     {
+        // searchNotifier.Subscribe(Search);
+        
         componentObserver = StateObserver.Register<ComponentCreatedEvent>(OnComponentCreated);
         localPublisher = PublisherFactory.CreatePublisher("BeaconEndpoint", PublisherType.Local);
     }

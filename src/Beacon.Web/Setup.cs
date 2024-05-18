@@ -1,5 +1,6 @@
 ﻿using Apollo;
 using Apollo.Messaging;
+using Apollo.Messaging.NATS;
 using Beacon.Services;
 using Beacon.Web.Components;
 using Beacon.Web.Endpoints;
@@ -15,11 +16,12 @@ public static class Setup
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
         builder.Services.AddFluentUIComponents();
         builder.Services.AddDataGridEntityFrameworkAdapter();
-        
+
         builder.Services.AddBeaconServices();
         builder.Services.AddHostedService<HealthCheckRefresher>();
         builder.Services.AddApollo(
-            x => x.WithEndpoints(
+            x => x.UseNats()
+                .WithEndpoints(
                 endpoints =>
                 {
                     endpoints.AddEndpoint<BeaconEndpoint>();
@@ -28,7 +30,7 @@ public static class Setup
         );
         builder.Services.AddSingleton<IStateObserver, StateObserver>();
         builder.Services.AddScoped<ITooltipService, TooltipService>();
-        
+
         return builder.Build();
     }
 
