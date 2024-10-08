@@ -10,13 +10,7 @@
       <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.7.2" />
       <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.DataGrid.EntityFrameworkAdapter" Version="4.7.2" />
       <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.7.2" />
-      <PackageReference Include="RickDotNet.Apollo.Messaging.NATS" Version="0.3.1" />
-      <PackageReference Include="RickDotNet.Apollo.Messaging.WebApi" Version="0.3.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css.map" />
+      <PackageReference Include="RickDotNet.Apollo.Providers.NATS" Version="0.4.4" />
     </ItemGroup>
 
     <ItemGroup>

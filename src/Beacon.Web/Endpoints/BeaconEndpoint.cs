@@ -1,6 +1,6 @@
 ﻿using Apollo;
-using Apollo.Messaging.Abstractions;
-using Apollo.Messaging.Publishing;
+using Apollo.Abstractions;
+using Apollo.Configuration;
 using Beacon.Contracts;
 using Beacon.Services;
 
@@ -12,17 +12,23 @@ public class BeaconEndpoint : IHandle<CreateComponentCommand>, IListenFor<Compon
     private readonly IStateObserver? stateObserver;
     private readonly IPublisher publisher;
 
-    public BeaconEndpoint(BeaconStore beaconStore, IPublisherFactory publisherFactory, IStateObserver? stateObserver)
+    public static readonly EndpointConfig EndpointConfig = new()
+    {
+        EndpointName = "Beacon Endpoint",
+        Subject = "beacon",
+    };
+
+    public BeaconEndpoint(BeaconStore beaconStore, ApolloClient apollo, IStateObserver? stateObserver)
     {
         this.beaconStore = beaconStore;
         this.stateObserver = stateObserver;
-        publisher = publisherFactory.CreatePublisher("BeaconEndpoint");
+        publisher = apollo.CreatePublisher(EndpointConfig);
     }
 
-    public async Task HandleAsync(CreateComponentCommand message, CancellationToken cancellationToken)
+    public async Task Handle(CreateComponentCommand message, CancellationToken cancellationToken)
     {
         var component = await beaconStore.AddComponentAsync(message);
-        await publisher.BroadcastAsync(
+        await publisher.Broadcast(
             new ComponentCreatedEvent
             {
                 Id = component.Guid,
@@ -36,7 +42,7 @@ public class BeaconEndpoint : IHandle<CreateComponentCommand>, IListenFor<Compon
             }, cancellationToken);
     }
 
-    public Task HandleAsync(ComponentCreatedEvent message, CancellationToken cancellationToken = default)
+    public Task Handle(ComponentCreatedEvent message, CancellationToken cancellationToken = default)
     {
         Console.WriteLine($"Component created: {message.Name}");
         return stateObserver?.NotifyAsync(message, cancellationToken) ?? Task.CompletedTask;

@@ -1,4 +1,4 @@
-﻿using Apollo.Messaging.Abstractions;
+﻿using Apollo.Abstractions;
 
 namespace Beacon.Contracts;
 

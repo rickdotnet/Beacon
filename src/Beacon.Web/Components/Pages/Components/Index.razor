@@ -1,13 +1,12 @@
 ﻿@page "/components"
 @implements IDisposable
-@using Apollo.Messaging.Abstractions
-@using Apollo.Messaging.Publishing
+@using Apollo.Abstractions
 @using Beacon.Contracts.Models
 @using Beacon.Services
 @using Beacon.Web.Components.Dialogs
-@inject IPublisherFactory PublisherFactory
+@using Beacon.Web.Endpoints
+@inject ApolloClient PublisherFactory
 @inject BeaconStore BeaconStore
-@inject HealthCheckStore HealthCheckStore
 @inject IStateObserver StateObserver
 @inject IDialogService DialogService
 @rendermode InteractiveServer
@@ -83,7 +82,7 @@
         // searchNotifier.Subscribe(Search);
         
         componentObserver = StateObserver.Register<ComponentCreatedEvent>(OnComponentCreated);
-        localPublisher = PublisherFactory.CreatePublisher("BeaconEndpoint", PublisherType.Local);
+        localPublisher = PublisherFactory.CreatePublisher(BeaconEndpoint.EndpointConfig);
     }
 
     private Task OnComponentCreated(ComponentCreatedEvent arg)
@@ -106,7 +105,7 @@
         if (result is { Cancelled: false, Data: not null })
         {
             var component = (EditComponentDialog.EditComponentData)result.Data;
-            await localPublisher.SendCommandAsync(new CreateComponentCommand
+            await localPublisher.Send(new CreateComponentCommand
             {
                 Name = component.Name,
                 Type = component.Type,

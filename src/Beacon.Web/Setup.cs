@@ -1,6 +1,5 @@
-﻿using Apollo;
-using Apollo.Messaging;
-using Apollo.Messaging.NATS;
+﻿using Apollo.Configuration;
+using Apollo.Extensions.Microsoft.Hosting;
 using Beacon.Services;
 using Beacon.Web.Components;
 using Beacon.Web.Endpoints;
@@ -20,13 +19,11 @@ public static class Setup
         builder.Services.AddBeaconServices();
         builder.Services.AddHostedService<HealthCheckRefresher>();
         builder.Services.AddApollo(
-            x => x.UseNats()
-                .WithEndpoints(
-                endpoints =>
-                {
-                    endpoints.AddEndpoint<BeaconEndpoint>();
-                    endpoints.AddEndpoint<HealthCheckEndpoint>();
-                })
+            new ApolloConfig { DefaultConsumerName = "default" },
+            ab => ab
+                .AddEndpoint<BeaconEndpoint>(BeaconEndpoint.EndpointConfig)
+                .AddEndpoint<HealthCheckEndpoint>(HealthCheckEndpoint.EndpointConfig)
+               // .AddNatsProvider(opts => opts with { Url = "nats://localhost:4222" })
         );
         builder.Services.AddSingleton<IStateObserver, StateObserver>();
         builder.Services.AddScoped<ITooltipService, TooltipService>();
